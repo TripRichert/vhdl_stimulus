@@ -70,6 +70,7 @@ package body stimulus_pkg is
       end if;
       wait until active_edge(clk, edge) and tready = '1';
     end loop;
+    tvalid <= '0';
     tlast <= '0';
     done <= '1';
     wait;
