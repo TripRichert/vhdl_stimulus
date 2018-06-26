@@ -10,7 +10,7 @@ entity axistream_stim_unsigned is
   generic (
     filename : string;
     elemPerLine : natural := 2;
-    bitsPerElem : natural := 2
+    bitsPerElem : natural := 4
     );
   port (
     clk : in std_ulogic;

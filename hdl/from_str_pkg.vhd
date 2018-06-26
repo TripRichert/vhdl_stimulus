@@ -12,9 +12,19 @@ package from_str_pkg is
 end package from_str_pkg;
 
 package body from_str_pkg is
-  function strToUnsigned(val : string; len : natural) return unsigned is
+  function toDigit(c : character) return natural is
   begin
-    return to_unsigned(1, len);
+    return character'pos(c) - character'pos(character'('0'));
+  end function toDigit;
+  function strToUnsigned(val : string; len : natural) return unsigned is
+    variable retVal : unsigned(len - 1 downto 0) := (others => '0');
+    variable tmp : integer;
+  begin
+    for i in val'right downto val'left loop
+      retVal := resize(retVal * to_unsigned(10, 4), retVal'length);
+      retVal := retVal + toDigit(val(i));
+    end loop;
+    return retVal;
   end function strToUnsigned;
   function strToSigned(val : string; len : natural) return signed is
   begin

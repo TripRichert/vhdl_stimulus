@@ -17,7 +17,7 @@ architecture behavioral of test_unsigned_adder is
   generic (
     filename : string;
     elemPerLine : natural := 2;
-    bitsPerElem : natural := 2
+    bitsPerElem : natural := 4
     );
   port (
     clk : in std_ulogic;
