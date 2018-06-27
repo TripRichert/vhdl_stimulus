@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.str_lst_pkg.all;
 use work.from_str_pkg.all;
-
+use work.to_str_pkg.all;
 entity test_unsigned_adder is
   generic ( filename : string := "testname.txt");
 
@@ -22,9 +22,18 @@ entity test_unsigned_adder is
     end loop;
     return retVal;
   end function fromStr;
+
   
   package stimulus_pkg_Unsigned is new work.stimulus_pkg generic map(elemType, fromStr);
   use stimulus_pkg_Unsigned.axiStreamStimulus;
+
+  function toStr(val : elemType) return string is
+  begin
+   return toStr(val(0) + val(1));
+  end function toStr;
+      
+  package log_pkg_Unsigned is new work.log_pkg generic map(elemType, toStr);
+  use log_pkg_Unsigned.axiStreamLog;
 
 end entity test_unsigned_adder;
 
@@ -33,17 +42,20 @@ architecture behavioral of test_unsigned_adder is
   signal tvalid : std_ulogic;
   signal tready : std_ulogic;
   signal tlast  : std_ulogic;
-  signal done   : std_ulogic := '0';
+  signal inputDone   : std_ulogic := '0';
 
   constant clk_period : time := 10 ns;
   signal tdata : elemType;
 
+  signal done  : std_ulogic;
+
+  signal tlast_cnt : natural := 0;
 begin
 
 
   process
   begin
-    done <= '0';
+    inputDone <= '0';
 
     axiStreamStimulus(
       filename => filename,
@@ -53,8 +65,17 @@ begin
       tready => tready,
       tdata => tdata,
       tlast => tlast,
-      done => done
+      done => inputDone
       );
+  end process;
+
+  process(clk)
+  begin
+    if rising_Edge(clk) then
+      if tlast = '1' and tvalid = '1' and tready = '1' then
+        tlast_cnt <= tlast_cnt + 1;
+      end if;
+    end if;
   end process;
 
   process(clk)
@@ -67,6 +88,20 @@ begin
     end if;
   end process;
 
+  process
+  begin
+    axiStreamLog(
+      filename => string'("outputFile.txt"),
+      clk => clk,
+      edge => '1',
+      tvalid => tvalid,
+      tready => tready,
+      tdata => tdata,
+      tlast => tlast,
+      close => inputDone
+      );
+  end process;
+
   
   process
   begin
@@ -74,20 +109,18 @@ begin
     clk <= '0';
     wait for clk_period/2;
     clk <= '1';
-    if done = '1' then
+    if inputDone = '1' then
       wait;
     end if;
   end process;
 
   process
   begin
-    tready <= '0';
     wait until rising_edge(clk);
     wait until rising_edge(clk);
     wait until rising_edge(clk);
     wait until rising_edge(clk);
     wait until rising_edge(clk);
-    tready <= '1';
     wait;
   end process;
   
