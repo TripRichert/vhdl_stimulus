@@ -17,3 +17,4 @@ ghdl -e --std=08 test_unsigned_adder
 
 #to run
 #ghdl -r --std=08 test_unsigned_adder
+#will end with 'timeout' failure if operating correctly

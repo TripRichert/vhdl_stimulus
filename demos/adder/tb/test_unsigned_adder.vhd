@@ -36,24 +36,6 @@ end entity test_unsigned_adder;
 
 architecture behavioral of test_unsigned_adder is
 
-  component axistream_unsigned_adder is
-  generic (
-    bitWidth : natural := 8
-    );
-  port (
-    clk         : in std_ulogic;
-    src_tvalid  : in std_ulogic;
-    src_tready  : out std_ulogic;
-    src_tdata_a : in unsigned(bitWidth - 1 downto 0);
-    src_tdata_b : in unsigned(bitWidth - 1 downto 0);
-    src_tlast   : in std_ulogic;
-    dest_tvalid : out std_ulogic;
-    dest_tready : in  std_ulogic;
-    dest_tdata  : out unsigned(bitWidth downto 0);
-    dest_tlast  : out std_ulogic
-    );
-  end component axistream_unsigned_adder;
-
   signal clk : std_ulogic;
   signal tvalid : std_ulogic;
   signal tready : std_ulogic;
@@ -114,7 +96,7 @@ begin
     end if;
   end process;
 
-  uut: axistream_unsigned_adder
+  uut: entity work.axistream_unsigned_adder
   generic map (
     bitWidth => bitsPerElem
     )
