@@ -65,6 +65,7 @@ package body stimulus_pkg is
       read(l, tmp, semicolon);
       tdata <= fromStr(tmp.all);
       tvalid <= '1';
+      tlast <= '0';
       if endfile(file_handler) or (l'length > 0 and l.all(l'left) = ';') then
         tlast <= '1';
       end if;

@@ -6,15 +6,15 @@ use work.from_str_pkg.all;
 use work.to_str_pkg.all;
 entity test_unsigned_adder is
   generic (
-    input_filename : string := "testname.txt";
-    output_filename : string := "output.txt"
+    input_filename : string := "testdata/test0.dat";
+    output_filename : string := "testdata/sum0.result"
     );
   port (
     done : out std_ulogic
     );
 
   constant elemPerLine : natural := 2;
-  constant bitsPerElem : natural := 4;
+  constant bitsPerElem : natural := 8;
 
   type elemType is array(elemPerLine - 1 downto 0) of unsigned(bitsPerElem - 1 downto 0);
 
