@@ -5,7 +5,13 @@ use work.str_lst_pkg.all;
 use work.from_str_pkg.all;
 use work.to_str_pkg.all;
 entity test_unsigned_adder is
-  generic ( filename : string := "testname.txt");
+  generic (
+    input_filename : string := "testname.txt";
+    output_filename : string := "output.txt"
+    );
+  port (
+    done : out std_ulogic
+    );
 
   constant elemPerLine : natural := 2;
   constant bitsPerElem : natural := 4;
@@ -73,15 +79,27 @@ architecture behavioral of test_unsigned_adder is
   constant clk_period : time := 10 ns;
   signal tdata : elemType;
 
-  signal done  : std_ulogic;
-
   signal tlast_cnt : natural := 0;
+  signal logTlast_cnt : natural := 0;
+  signal timeout_cnt : natural := 0;
+
+  signal first : boolean := true;
 begin
 
   process(clk)
   begin
     if rising_edge(clk) then
-      closeOutput <= inputDone and log_tlast and log_tvalid and log_tready;
+      timeout_cnt <= timeout_cnt + 1;
+      assert logTlast_cnt <= tlast_cnt report "more output tlasts than input tlasts" severity error;
+      if inputDone = '1' and logTlast_cnt = tlast_cnt then
+        closeOutput <= '1';
+        if first then
+          first <= false;
+          report "this worked";
+        end if;
+      elsif timeout_cnt = 1000 then
+        closeOutput <= '1';
+      end if;
     end if;
   end process;
 
@@ -90,7 +108,7 @@ begin
     inputDone <= '0';
 
     axiStreamStimulus(
-      filename => filename,
+      filename => input_filename,
       clk => clk,
       edge => '1',
       tvalid => tvalid,
@@ -107,15 +125,8 @@ begin
       if tlast = '1' and tvalid = '1' and tready = '1' then
         tlast_cnt <= tlast_cnt + 1;
       end if;
-    end if;
-  end process;
-
-  process(clk)
-  begin
-    if rising_Edge(clk) then
-      if tvalid = '1' and tready = '1' then
-        report string'("0: ") & integer'image(to_integer(tdata(0)));
-        report string'("1: ") & integer'image(to_integer(tdata(1)));
+      if log_tlast = '1' and log_tvalid = '1' and log_tready = '1' then
+        logTlast_cnt <= logTlast_cnt + 1;
       end if;
     end if;
   end process;
@@ -140,7 +151,7 @@ begin
   process
   begin
     axiStreamLog(
-      filename => string'("outputFile.txt"),
+      filename => output_filename,
       clk => clk,
       edge => '1',
       tvalid => log_tvalid,
@@ -158,10 +169,9 @@ begin
     clk <= '0';
     wait for clk_period/2;
     clk <= '1';
-    if closeOutput = '1' then
-      wait;
-    end if;
   end process;
+
+  done <= closeOutput;
 
   process
   begin
