@@ -13,16 +13,16 @@ package log_pkg is
     function toStr(val : elemType) return string
     );
 
-  
+  --! writes file line by line, with each tdata being one line
   procedure axiStreamLog(
     constant filename : in string;
     signal   clk      : in  std_ulogic;
-    constant edge     : in std_ulogic;
+    constant edge     : in std_ulogic;--! '1' if rising clk, '0' if falling clk
     signal   tvalid   : in std_ulogic;
     signal   tready   : out  std_ulogic;
     signal   tdata    : in elemType;
-    signal   tlast    : in std_ulogic;
-    signal   close    : in std_ulogic
+    signal   tlast    : in std_ulogic;--! tlast terminates line with semicolon
+    signal   close    : in std_ulogic--! '1' when you want to close file
     );
   
 end package log_pkg;

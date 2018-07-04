@@ -7,6 +7,8 @@ library std;
 use std.textio.all;
 
 package textio_ext is
+  
+  --! reads out of l into value until end of l or character in delim
   procedure read(l : inout Line; value : inout Line; delim : in string);
   
 end package textio_ext;
@@ -38,6 +40,7 @@ package body textio_ext is
       return r - l;
     end if;
   end function distance;
+
   
   procedure read(l : inout Line; value : inout Line;
                  delim : in string) is

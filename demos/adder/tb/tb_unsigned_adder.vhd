@@ -16,6 +16,7 @@ architecture tb of tb_unsigned_adder is
 
   signal done : std_ulogic;
 begin
+
   uut: entity work.test_unsigned_adder
     generic map (
       input_filename => input_filename,
@@ -24,12 +25,13 @@ begin
     port map(
       done => done
       );
+  
   test_runner : process
   begin
     test_runner_setup(runner, runner_cfg);
     wait until done = '1';
-    report "We got here after all";
     test_runner_cleanup(runner); -- Simulation ends here
     wait;
   end process;
+  
 end architecture;

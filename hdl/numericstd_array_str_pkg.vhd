@@ -12,8 +12,11 @@ package numericstd_array_str_pkg is
       constant bitsPerElem : natural := 4
       );
 
-    type unsigned_arr is array(elemPerLine - 1 downto 0) of unsigned(bitsPerElem - 1 downto 0);
-    type signed_arr is array(elemPerLine - 1 downto 0) of signed(bitsPerElem - 1 downto 0);
+    type unsigned_arr is array(elemPerLine - 1 downto 0)
+      of unsigned(bitsPerElem - 1 downto 0);
+    
+    type signed_arr is array(elemPerLine - 1 downto 0)
+      of signed(bitsPerElem - 1 downto 0);
 
     function fromStrToUnsignedArray(val : string) return unsigned_arr;
     function fromStrToSignedArray(val : string) return signed_arr;
@@ -29,9 +32,12 @@ package body numericstd_array_str_pkg is
   begin
     assert(elemPerLine = getLstNumSeg(val, string'(" ")))
       report "wrong number of elements per line" severity warning;
+    
+    --each segment is one unsigned number. Read each into element
     for i in 0 to elemPerLine - 1 loop
       retVal(i) := strToUnsigned(getLstSeg(val, i, string'(" ")), bitsPerElem);
     end loop;
+    
     return retVal;
   end function fromStrToUnsignedArray;
 
@@ -40,13 +46,17 @@ package body numericstd_array_str_pkg is
   begin
     assert(elemPerLine = getLstNumSeg(val, string'(" ")))
       report "wrong number of elements per line" severity warning;
+
+    --each segment is one signed number. Read each into element
     for i in 0 to elemPerLine - 1 loop
       retVal(i) := strToSigned(getLstSeg(val, i, string'(" ")), bitsPerElem);
     end loop;
+    
     return retVal;
   end function fromStrToSignedArray;
 
--- ---------------------------------------------------------------------------
+------------------------------------------------------------------------------
+  --! recursive function returning remaining elements as string
   function toStr(val : unsigned_arr; startAt : natural) return string is
   begin
     if startAt < val'length - 1 then
@@ -62,8 +72,8 @@ package body numericstd_array_str_pkg is
   end function toStr;
 
 
---   ------------------------------------------------------------------------------
-  
+-----------------------------------------------------------------------------
+  --! recursive function returning remaining elements as string
   function toStr(val : signed_arr; startAt : natural) return string is
   begin
     if startAt < val'length - 1 then
@@ -77,4 +87,5 @@ package body numericstd_array_str_pkg is
   begin
     return toStr(val, 0);
   end function toStr;
+  
 end package body numericstd_array_str_pkg;

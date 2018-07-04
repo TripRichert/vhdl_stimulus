@@ -1,9 +1,15 @@
 library ieee;
 use ieee.std_logic_1164.all;
-
+--! string tokenizer package
 package str_lst_pkg is
+  
+  --! returns number of substrings split by any delimator character in delim
   function getLstNumSeg(val : string; delim : string) return natural;
-  function getLstSeg(val : string; index : natural; delim : string) return string;
+
+  --! returns the index'th substring (token) split by any character in delim
+  function getLstSeg(val : string; index : natural; delim : string)
+    return string;
+  
 end package str_lst_pkg;
 
 package body str_lst_pkg is
@@ -53,7 +59,9 @@ package body str_lst_pkg is
     return cnt;
   end function getLstNumSeg;
   
-  function getLstSeg(val : string; index : natural; delim : string) return string is
+  function getLstSeg(val : string; index : natural; delim : string)
+    return string is
+    
     variable incr  : integer;
     variable cnt   : natural := 0;
     variable v_index : integer := val'left;
@@ -65,10 +73,15 @@ package body str_lst_pkg is
     else
       incr := -1;
     end if;
-    assert val'length > 0 report "string must have length to find substring" severity error;
 
+    assert val'length > 0 report "string must have length to find substring"
+      severity error;
+
+    --skip characters before the index'th token
     while cnt < index loop
-      assert v_index /= val'right report "substring index out of range" severity failure;
+      assert v_index /= val'right report "substring index out of range"
+        severity failure;
+      
       while v_index /= val'right and isMatch(val(v_index), delim) loop
         v_index := v_index + incr;
       end loop;
@@ -79,9 +92,12 @@ package body str_lst_pkg is
         v_index := v_index + incr;
       end loop;
     end loop;
+    --skip delimators to get to index'th token
     while v_index /= val'right and isMatch(val(v_index), delim) loop
       v_index := v_index + incr;
     end loop;
+
+    --find end of index'th token
     left := v_index;
     while v_index /= val'right and not isMatch(val(v_index), delim) loop
       v_index := v_index + incr;
@@ -97,4 +113,5 @@ package body str_lst_pkg is
       return val(right downto left);
     end if;
   end function getLstSeg;
+  
 end package body str_lst_pkg;

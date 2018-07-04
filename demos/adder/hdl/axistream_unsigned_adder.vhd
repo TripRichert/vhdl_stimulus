@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity axistream_unsigned_adder is
   generic (
     bitWidth : natural := 8;
-    edge     : std_ulogic := '1'
+    edge     : std_ulogic := '1'--! '1' when rising clk, '0' when falling
     );
   port (
     clk         : in std_ulogic;
@@ -41,13 +41,19 @@ begin
   begin
     if clk'event and clk = edge and clk'last_value = not edge then
       if src_tvalid = '1' and src_tready_cpy = '1' then
+
         dest_tdata <= resize(src_tdata_a, bitWidth + 1)
                       + resize(src_tdata_b, bitWidth + 1);
+        
         dest_tlast_cpy <= src_tlast;
         queued <= true;
-      elsif dest_tvalid_cpy = '1' and dest_tready = '1' and src_tvalid = '0' then
+        
+      elsif dest_tvalid_cpy = '1' and dest_tready = '1'
+        and src_tvalid = '0' then
+        
         queued <= false;
         dest_tlast_cpy <= '0';
+
       end if;
     end if;
   end process;

@@ -12,15 +12,15 @@ package stimulus_pkg is
     function fromStr(val : string) return elemType
     );
 
-  
+  --! reads file line by line, with each line corresponding to tdata
   procedure axiStreamStimulus(
     constant filename : in string;
     signal   clk      : in  std_ulogic;
-    constant edge     : in std_ulogic;
+    constant edge     : in std_ulogic;--! '1' when rising clk, '0' when falling
     signal   tvalid   : out std_ulogic;
     signal   tready   : in  std_ulogic;
     signal   tdata    : out elemType;
-    signal   tlast    : out std_ulogic;
+    signal   tlast    : out std_ulogic;--! lines terminated with ; or last line
     signal   done     : out std_ulogic
     );
   
