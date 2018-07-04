@@ -15,8 +15,16 @@ lib.add_source_files(join(dirname(__file__), 'tb', '*.vhd'))
 
 tb = lib.entity("tb_stall")
 testdata_dir = join(dirname(__file__), 'testdata')
-test0Generics = dict(input_filename=join(testdata_dir, 'test0.dat'), output_filename=join(testdata_dir, 'test0.result'));
-test1Generics = dict(input_filename=join(testdata_dir, 'test1.dat'), output_filename=join(testdata_dir, 'test1.result'));
+test0Generics = dict(
+    input_filename=join(testdata_dir, 'test0.dat'),
+    ctrlInput_filename=join(testdata_dir, 'togglectrl.dat'),
+    ctrlOutput_filename=join(testdata_dir, 'noctrl.dat'),
+    output_filename=join(testdata_dir, 'test0.result'));
+test1Generics = dict(
+    input_filename=join(testdata_dir, 'test1.dat'),
+    ctrlInput_filename=join(testdata_dir, 'togglectrl.dat'),
+    ctrlOutput_filename=join(testdata_dir, 'noctrl.dat'),
+    output_filename=join(testdata_dir, 'test1.result'));
 tb.add_config(name="test0", generics=test0Generics);
 tb.add_config(name="test1", generics=test1Generics);
 # Run vunit function

@@ -8,6 +8,8 @@ use work.to_str_pkg.all;
 entity test_stall is
   generic (
     input_filename : string := "testdata/test1.dat";
+    ctrlInput_filename : string := "testdata/noctrl.dat";
+    ctrlOutput_filename : string := "testdata/noctrl.dat";
     output_filename : string := "testdata/sum1.result";
     timeout         : time   := 1 us
     );
@@ -54,6 +56,15 @@ architecture behavioral of test_stall is
   signal tdata_flattened : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
   signal tlast  : std_ulogic;
 
+  signal ctrl_tvalid : std_ulogic;
+  signal ctrl_tready : std_ulogic;
+  signal ctrl_tlast  : std_ulogic;
+
+  signal stall_tvalid : std_ulogic;
+  signal stall_tready : std_ulogic;
+  signal stall_tlast  : std_ulogic;
+
+  
   signal log_tvalid : std_ulogic;
   signal log_tready : std_ulogic;
   signal log_tdata_flattened : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
@@ -90,6 +101,22 @@ begin
       );
   end process;
 
+    inputCtrl: entity work.axistream_flowctrl
+    generic map (
+      edge => '1',
+      ctrl_filename => ctrlInput_filename
+      )
+    port map (
+      clk => clk,
+      src_tvalid => tvalid,
+      src_tready => tready,
+      src_tlast => tlast,
+      dest_tvalid => ctrl_tvalid,
+      dest_tready => ctrl_tready,
+      dest_tlast  => ctrl_tlast,
+      closeFile   => closeOutput
+      );
+
   tdata_flattened <= flatten(tdata);
   uut: entity work.axistream_stall
   generic map (
@@ -97,15 +124,31 @@ begin
     )
   port map (
     clk         => clk,
-    src_tvalid  => tvalid,
-    src_tready  => tready,
+    src_tvalid  => ctrl_tvalid,
+    src_tready  => ctrl_tready,
     src_tdata => tdata_flattened,
-    src_tlast   => tlast,
-    dest_tvalid => log_tvalid,
-    dest_tready => log_tready,
+    src_tlast   => ctrl_tlast,
+    dest_tvalid => stall_tvalid,
+    dest_tready => stall_tready,
     dest_tdata  => log_tdata_flattened,
-    dest_tlast  => log_tlast
+    dest_tlast  => stall_tlast
     );
+
+  outputCtrl: entity work.axistream_flowctrl
+    generic map (
+      edge => '1',
+      ctrl_filename => ctrlOutput_filename
+      )
+    port map (
+      clk => clk,
+      src_tvalid => stall_tvalid,
+      src_tready => stall_tready,
+      src_tlast => stall_tlast,
+      dest_tvalid => log_tvalid,
+      dest_tready => log_tready,
+      dest_tlast  => log_tlast,
+      closeFile   => closeOutput
+      );
 
   log_tdata <= unflatten_unsignedArr(log_tdata_flattened);
   process
