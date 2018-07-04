@@ -7,5 +7,7 @@
 /home/bin/bin/ghdl -a --std=08 ../../hdl/stimulus_pkg.vhd
 /home/bin/bin/ghdl -a --std=08 ../../hdl/log_pkg.vhd
 
+/home/bin/bin/ghdl -a --std=08 hdl/axistream_unsigned_adder.vhd
+
 /home/bin/bin/ghdl -a --std=08 tb/test_unsigned_adder.vhd
 /home/bin/bin/ghdl -e --std=08 test_unsigned_adder

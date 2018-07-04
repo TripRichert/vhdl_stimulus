@@ -32,17 +32,43 @@ entity test_unsigned_adder is
    return toStr(val(0) + val(1));
   end function toStr;
       
-  package log_pkg_Unsigned is new work.log_pkg generic map(elemType, toStr);
+  package log_pkg_Unsigned is new work.log_pkg generic map(unsigned(bitsPerElem downto 0), toStr);
   use log_pkg_Unsigned.axiStreamLog;
 
 end entity test_unsigned_adder;
 
 architecture behavioral of test_unsigned_adder is
+
+  component axistream_unsigned_adder is
+  generic (
+    bitWidth : natural := 8
+    );
+  port (
+    clk         : in std_ulogic;
+    src_tvalid  : in std_ulogic;
+    src_tready  : out std_ulogic;
+    src_tdata_a : in unsigned(bitWidth - 1 downto 0);
+    src_tdata_b : in unsigned(bitWidth - 1 downto 0);
+    src_tlast   : in std_ulogic;
+    dest_tvalid : out std_ulogic;
+    dest_tready : in  std_ulogic;
+    dest_tdata  : out unsigned(bitWidth downto 0);
+    dest_tlast  : out std_ulogic
+    );
+  end component axistream_unsigned_adder;
+
   signal clk : std_ulogic;
   signal tvalid : std_ulogic;
   signal tready : std_ulogic;
   signal tlast  : std_ulogic;
+
+  signal log_tvalid : std_ulogic;
+  signal log_tready : std_ulogic;
+  signal log_tlast  : std_ulogic;
+  signal log_tdata  : Unsigned(bitsPerElem downto 0);
+
   signal inputDone   : std_ulogic := '0';
+  signal closeOutput : std_ulogic := '0';
 
   constant clk_period : time := 10 ns;
   signal tdata : elemType;
@@ -52,6 +78,12 @@ architecture behavioral of test_unsigned_adder is
   signal tlast_cnt : natural := 0;
 begin
 
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      closeOutput <= inputDone and log_tlast and log_tvalid and log_tready;
+    end if;
+  end process;
 
   process
   begin
@@ -88,17 +120,34 @@ begin
     end if;
   end process;
 
+  uut: axistream_unsigned_adder
+  generic map (
+    bitWidth => bitsPerElem
+    )
+  port map (
+    clk         => clk,
+    src_tvalid  => tvalid,
+    src_tready  => tready,
+    src_tdata_a => tdata(0),
+    src_tdata_b => tdata(1),
+    src_tlast   => tlast,
+    dest_tvalid => log_tvalid,
+    dest_tready => log_tready,
+    dest_tdata  => log_tdata,
+    dest_tlast  => log_tlast
+    );
+
   process
   begin
     axiStreamLog(
       filename => string'("outputFile.txt"),
       clk => clk,
       edge => '1',
-      tvalid => tvalid,
-      tready => tready,
-      tdata => tdata,
-      tlast => tlast,
-      close => inputDone
+      tvalid => log_tvalid,
+      tready => log_tready,
+      tdata => log_tdata,
+      tlast => log_tlast,
+      close => closeOutput
       );
   end process;
 
@@ -109,7 +158,7 @@ begin
     clk <= '0';
     wait for clk_period/2;
     clk <= '1';
-    if inputDone = '1' then
+    if closeOutput = '1' then
       wait;
     end if;
   end process;
