@@ -20,7 +20,7 @@ entity test_stall is
 
   --defined unsigned array and functions from and to strings for it
   package numeric_string is
-      new work.numericstd_array_str_pkg generic map(elemPerLine, bitsPerElem);
+      new work.numericstd_array_pkg generic map(elemPerLine, bitsPerElem);
   use numeric_string.all;
 
   --! wrapper unfortunately needed to get around ghdl bug
@@ -71,24 +71,6 @@ architecture behavioral of test_stall is
 
   signal timedout : boolean := false;
 
-  function flatten(val : unsigned_arr) return std_ulogic_vector is
-    variable retVal : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
-  begin
-    for i in 0 to elemPerLine - 1 loop
-      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem) := std_ulogic_vector(val(i));
-    end loop;
-    return retVal;
-  end function flatten;
-
-  function unflatten_unsignedArr(val : std_ulogic_vector) return unsigned_arr is
-    variable retVal : unsigned_arr;
-  begin
-    assert val'length = elemPerLine*bitsPerElem report "vector wrong length" severity error;
-    for i in 0 to elemPerLine - 1 loop
-      retVal(i) := unsigned(val((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
-    end loop;
-    return retVal;
-  end function unflatten_unsignedArr;
 begin
 
 

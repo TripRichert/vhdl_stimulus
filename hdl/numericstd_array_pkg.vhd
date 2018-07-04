@@ -6,7 +6,7 @@ use work.str_lst_pkg.all;
 use work.from_str_pkg.all;
 use work.to_str_pkg.all;
 
-package numericstd_array_str_pkg is
+package numericstd_array_pkg is
     generic (
       constant elemPerLine : natural := 2;
       constant bitsPerElem : natural := 4
@@ -22,10 +22,13 @@ package numericstd_array_str_pkg is
     function fromStrToSignedArray(val : string) return signed_arr;
     function toStr(val : unsigned_arr) return string;
     function toStr(val : signed_arr) return string;
+    function flatten(val : unsigned_arr) return std_ulogic_vector;
+    function flatten(val : signed_arr) return std_ulogic_vector;
+    function unflatten_unsignedArr(val : std_ulogic_vector) return unsigned_arr;
+    function unflatten_signedArr(val : std_ulogic_vector) return signed_arr;
+end package numericstd_array_pkg;
 
-end package numericstd_array_str_pkg;
-
-package body numericstd_array_str_pkg is
+package body numericstd_array_pkg is
 
   function fromStrToUnsignedArray(val : string) return unsigned_arr is
     variable retVal : unsigned_arr;
@@ -87,5 +90,44 @@ package body numericstd_array_str_pkg is
   begin
     return toStr(val, 0);
   end function toStr;
-  
-end package body numericstd_array_str_pkg;
+
+  -----------------------------------------------------------------------------
+  function flatten(val : unsigned_arr) return std_ulogic_vector is
+    variable retVal : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
+  begin
+    for i in 0 to elemPerLine - 1 loop
+      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem) := std_ulogic_vector(val(i));
+    end loop;
+    return retVal;
+  end function flatten;
+
+  function flatten(val : signed_arr) return std_ulogic_vector is
+    variable retVal : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
+  begin
+    for i in 0 to elemPerLine - 1 loop
+      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem) := std_ulogic_vector(val(i));
+    end loop;
+    return retVal;
+  end function flatten;
+
+  function unflatten_unsignedArr(val : std_ulogic_vector) return unsigned_arr is
+    variable retVal : unsigned_arr;
+  begin
+    assert val'length = elemPerLine*bitsPerElem report "vector wrong length" severity error;
+    for i in 0 to elemPerLine - 1 loop
+      retVal(i) := unsigned(val((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
+    end loop;
+    return retVal;
+  end function unflatten_unsignedArr;
+
+  function unflatten_signedArr(val : std_ulogic_vector) return signed_arr is
+    variable retVal : signed_arr;
+  begin
+    assert val'length = elemPerLine*bitsPerElem report "vector wrong length" severity error;
+    for i in 0 to elemPerLine - 1 loop
+      retVal(i) := signed(val((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
+    end loop;
+    return retVal;
+  end function unflatten_signedArr;
+
+end package body numericstd_array_pkg;

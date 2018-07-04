@@ -20,7 +20,7 @@ entity test_unsigned_adder is
 
   --defined unsigned array and functions from and to strings for it
   package numeric_string is
-      new work.numericstd_array_str_pkg generic map(elemPerLine, bitsPerElem);
+      new work.numericstd_array_pkg generic map(elemPerLine, bitsPerElem);
   use numeric_string.all;
 
   --! wrapper unfortunately needed to get around ghdl bug
