@@ -22,7 +22,7 @@ package body from_str_pkg is
     variable retVal : unsigned(len - 1 downto 0) := (others => '0');
     variable tmp : integer;
   begin
-    for i in val'right downto val'left loop
+    for i in val'left to val'right loop
       retVal := resize(retVal * to_unsigned(10, 4), retVal'length);
       retVal := retVal + toDigit(val(i));
     end loop;
@@ -43,7 +43,7 @@ package body from_str_pkg is
     else
       neg := false;
     end if;
-    for i in val'right downto left loop
+    for i in left to val'right loop
       retVal := resize(retVal * to_signed(10, 5), retVal'length);
       if neg then
         retVal := retVal - toDigit(val(i));

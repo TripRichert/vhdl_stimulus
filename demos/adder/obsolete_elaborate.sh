@@ -8,6 +8,7 @@ ghdl -a --std=08 ../../hdl/to_str_pkg.vhd
 ghdl -a --std=08 ../../hdl/str_lst_pkg.vhd
 ghdl -a --std=08 ../../hdl/stimulus_pkg.vhd
 ghdl -a --std=08 ../../hdl/log_pkg.vhd
+ghdl -a --std=08 ../../hdl/numericstd_array_str_pkg.vhd
 
 ghdl -a --std=08 hdl/axistream_unsigned_adder.vhd
 

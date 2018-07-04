@@ -6,8 +6,9 @@ use work.from_str_pkg.all;
 use work.to_str_pkg.all;
 entity test_unsigned_adder is
   generic (
-    input_filename : string := "testdata/test0.dat";
-    output_filename : string := "testdata/sum0.result"
+    input_filename : string := "testdata/test1.dat";
+    output_filename : string := "testdata/sum1.result";
+    timeout         : time   := 1 us
     );
   port (
     done : out std_ulogic
@@ -16,27 +17,17 @@ entity test_unsigned_adder is
   constant elemPerLine : natural := 2;
   constant bitsPerElem : natural := 8;
 
-  type elemType is array(elemPerLine - 1 downto 0) of unsigned(bitsPerElem - 1 downto 0);
+  package numeric_string is new work.numericstd_array_str_pkg generic map(elemPerLine, bitsPerElem);
+                              use numeric_string.all;
 
-  function fromStr(val : string) return elemType is
-    variable retVal : elemType;
+  --wrapper unfortunately needed to get around ghdl bug
+  function fromStr(val : string) return unsigned_arr is
   begin
-    assert(elemPerLine = getLstNumSeg(val, string'(" ")))
-      report "wrong number of elements per line" severity warning;
-    for i in 0 to elemPerLine - 1 loop
-      retVal(i) := strToUnsigned(getLstSeg(val, i, string'(" ")), bitsPerElem);
-    end loop;
-    return retVal;
+    return fromStrToUnsignedArray(val);
   end function fromStr;
-
-  
-  package stimulus_pkg_Unsigned is new work.stimulus_pkg generic map(elemType, fromStr);
+                                      
+  package stimulus_pkg_Unsigned is new work.stimulus_pkg generic map(unsigned_arr, fromStr);
   use stimulus_pkg_Unsigned.axiStreamStimulus;
-
-  function toStr(val : elemType) return string is
-  begin
-   return toStr(val(0) + val(1));
-  end function toStr;
       
   package log_pkg_Unsigned is new work.log_pkg generic map(unsigned(bitsPerElem downto 0), toStr);
   use log_pkg_Unsigned.axiStreamLog;
@@ -77,11 +68,10 @@ architecture behavioral of test_unsigned_adder is
   signal closeOutput : std_ulogic := '0';
 
   constant clk_period : time := 10 ns;
-  signal tdata : elemType;
+  signal tdata : unsigned_arr;
 
   signal tlast_cnt : natural := 0;
   signal logTlast_cnt : natural := 0;
-  signal timeout_cnt : natural := 0;
 
   signal first : boolean := true;
 begin
@@ -89,15 +79,8 @@ begin
   process(clk)
   begin
     if rising_edge(clk) then
-      timeout_cnt <= timeout_cnt + 1;
-      assert logTlast_cnt <= tlast_cnt report "more output tlasts than input tlasts" severity error;
+      assert logTlast_cnt <= tlast_cnt report "more output tlasts than input tlasts" severity failure;
       if inputDone = '1' and logTlast_cnt = tlast_cnt then
-        closeOutput <= '1';
-        if first then
-          first <= false;
-          report "this worked";
-        end if;
-      elsif timeout_cnt = 1000 then
         closeOutput <= '1';
       end if;
     end if;
@@ -171,16 +154,13 @@ begin
     clk <= '1';
   end process;
 
-  done <= closeOutput;
-
   process
   begin
-    wait until rising_edge(clk);
-    wait until rising_edge(clk);
-    wait until rising_edge(clk);
-    wait until rising_edge(clk);
-    wait until rising_edge(clk);
+    wait for timeout;
+    assert(0 = 1) report "simulation timed out" severity failure;
     wait;
   end process;
+
+  done <= closeOutput;
   
 end architecture behavioral;
