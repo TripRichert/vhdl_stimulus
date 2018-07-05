@@ -27,6 +27,7 @@ package numericstd_array_pkg is
     function flatten(val : signed_arr) return std_ulogic_vector;
     function unflatten_unsignedArr(val : std_ulogic_vector) return unsigned_arr;
     function unflatten_signedArr(val : std_ulogic_vector) return signed_arr;
+
 end package numericstd_array_pkg;
 
 package body numericstd_array_pkg is
@@ -97,7 +98,8 @@ package body numericstd_array_pkg is
     variable retVal : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
   begin
     for i in 0 to elemPerLine - 1 loop
-      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem) := std_ulogic_vector(val(i));
+      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem)
+        := std_ulogic_vector(val(i));
     end loop;
     return retVal;
   end function flatten;
@@ -106,27 +108,39 @@ package body numericstd_array_pkg is
     variable retVal : std_ulogic_vector(elemPerLine * bitsPerElem - 1 downto 0);
   begin
     for i in 0 to elemPerLine - 1 loop
-      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem) := std_ulogic_vector(val(i));
+      retVal((i + 1) * bitsPerElem - 1 downto i * bitsPerElem)
+        := std_ulogic_vector(val(i));
     end loop;
     return retVal;
   end function flatten;
 
   function unflatten_unsignedArr(val : std_ulogic_vector) return unsigned_arr is
     variable retVal : unsigned_arr;
+    variable val_cpy : std_ulogic_vector(val'length - 1 downto 0)
+      := val(val'left downto val'right);
+    
   begin
-    assert val'length = elemPerLine*bitsPerElem report "vector wrong length" severity error;
+    assert val'length = elemPerLine*bitsPerElem
+      report "vector wrong length" severity error;
+    
     for i in 0 to elemPerLine - 1 loop
-      retVal(i) := unsigned(val((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
+      retVal(i)
+        := unsigned(val_cpy((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
     end loop;
     return retVal;
   end function unflatten_unsignedArr;
 
   function unflatten_signedArr(val : std_ulogic_vector) return signed_arr is
     variable retVal : signed_arr;
+    variable val_cpy : std_ulogic_vector(val'length - 1 downto 0)
+      := val(val'left downto val'right);
   begin
-    assert val'length = elemPerLine*bitsPerElem report "vector wrong length" severity error;
+    assert val'length = elemPerLine*bitsPerElem
+      report "vector wrong length" severity error;
+    
     for i in 0 to elemPerLine - 1 loop
-      retVal(i) := signed(val((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
+      retVal(i)
+        := signed(val_cpy((i+1)*bitsPerElem - 1 downto i*bitsPerElem));
     end loop;
     return retVal;
   end function unflatten_signedArr;
