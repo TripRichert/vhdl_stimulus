@@ -8,14 +8,14 @@ use std.textio.all;
 --once all lines of file are read, repeats.
 entity axistream_flowctrl is
   generic (
-    edge : std_ulogic;
+    edge : std_ulogic := '1';--! '1' for rising clk, '0' for falling
     ctrl_filename : string
     );
   port (
-    clk : in std_ulogic;
-    src_tvalid : in std_ulogic;
-    src_tready : out std_ulogic;
-    src_tlast  : in  std_ulogic;
+    clk         : in std_ulogic;
+    src_tvalid  : in std_ulogic;
+    src_tready  : out std_ulogic;
+    src_tlast   : in  std_ulogic;
     dest_tvalid : out std_ulogic;
     dest_tready : out std_ulogic;
     dest_tlast  : out std_ulogic;

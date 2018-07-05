@@ -4,6 +4,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! functions to convert data in strings to other types
 package from_str_pkg is
   
   function strToUnsigned(

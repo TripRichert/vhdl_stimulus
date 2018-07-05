@@ -6,6 +6,7 @@ use work.str_lst_pkg.all;
 use work.from_str_pkg.all;
 use work.to_str_pkg.all;
 
+--! a set of functions for working with arrays of numeric vectors
 package numericstd_array_pkg is
     generic (
       constant elemPerLine : natural := 2;

@@ -6,6 +6,7 @@ use std.textio.all;
 library work;
 use work.textio_ext.all;
 
+--! reads data from file to provide as stimulus input to units under test
 package stimulus_pkg is
   generic (
     type elemType;

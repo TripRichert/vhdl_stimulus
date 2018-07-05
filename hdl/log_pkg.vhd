@@ -6,7 +6,7 @@ use std.textio.all;
 library work;
 use work.textio_ext.all;
 
-
+--! procedures to log data to file
 package log_pkg is
   generic (
     type elemType;
