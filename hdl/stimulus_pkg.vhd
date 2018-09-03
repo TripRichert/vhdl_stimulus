@@ -55,21 +55,45 @@ package body stimulus_pkg is
     variable tmp      : line;
     variable second   : line;
     constant semicolon    : string(1 to 1) := ";";
+    variable endLoop  : boolean := false;
   begin
     done   <= '0';
     tvalid <= '0';
     tlast  <= '0';
     done   <= '0';
     wait until active_edge(clk, edge);
-    while not endfile(file_handler) loop
+    while not endfile(file_handler) and (tmp = null or tmp'length = 0) loop
       readline(file_handler, l);
       read(l, tmp, semicolon);
+    end loop;
+    if tmp = null or tmp'length = 0 then
+      endLoop := true;
+    end if;
+    while not endLoop loop
       tdata <= fromStr(tmp.all);
       tvalid <= '1';
       tlast <= '0';
-      if endfile(file_handler) or (l'length > 0 and l.all(l'left) = ';') then
+      if l'length > 0 and l.all(l'left) = 'l' then--semicolon marks tlast
         tlast <= '1';
       end if;
+      if endfile(file_handler) then--last data, thus tlast
+        tlast <= '1';
+        endLoop := true;
+      else
+        readline(file_handler, l);
+        read(l, tmp, semicolon);
+        while not endfile(file_handler)
+          and (l'length = 0 or tmp'length = 0) loop
+          
+          readline(file_handler, l);
+          read(l, tmp, semicolon);
+        end loop;
+        if tmp'length = 0 then--only empty lines, last data, thus tlast
+          tlast <= '1';
+          endLoop := true;
+        end if;
+      end if;
+      
       wait until active_edge(clk, edge) and tready = '1';
     end loop;
     tvalid <= '0';

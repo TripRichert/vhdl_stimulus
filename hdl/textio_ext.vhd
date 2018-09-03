@@ -64,10 +64,13 @@ package body textio_ext is
     end if;
     index := l'left;
 
-    while index /= l'right and isContained(l(index), delim) loop
-      index := index + incr;
-    end loop;
-    if index = l'right and isContained(l(index), delim) then
+
+    if l'length > 0 then
+      while index /= l'right and isContained(l(index), delim) loop
+        index := index + incr;
+      end loop;
+    end if;
+    if l'length = 0 or (index = l'right and isContained(l(index), delim)) then
       deallocate(l);
       l := new string'("");
       value := new string'("");
