@@ -73,7 +73,7 @@ package body stimulus_pkg is
       tdata <= fromStr(tmp.all);
       tvalid <= '1';
       tlast <= '0';
-      if l'length > 0 and l.all(l'left) = 'l' then--semicolon marks tlast
+      if l'length > 0 and l.all(l'left) = ';' then--semicolon marks tlast
         tlast <= '1';
       end if;
       if endfile(file_handler) then--last data, thus tlast
