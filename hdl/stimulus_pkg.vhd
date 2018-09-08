@@ -83,7 +83,7 @@ package body stimulus_pkg is
         readline(file_handler, l);
         read(l, tmp, semicolon);
         while not endfile(file_handler)
-          and (l'length = 0 or tmp'length = 0) loop
+          and (tmp'length = 0) loop
           
           readline(file_handler, l);
           read(l, tmp, semicolon);

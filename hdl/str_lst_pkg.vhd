@@ -26,7 +26,8 @@ package body str_lst_pkg is
   end function isMatch;
   
   function getLstNumSeg(val : string; delim : string) return natural is
-    variable index : integer := val'left;
+    variable v_index : integer := val'left;
+    variable index   : natural   := 1;
     variable incr  : integer;
     variable cnt   : natural := 0;
     
@@ -39,13 +40,17 @@ package body str_lst_pkg is
     if val'length = 0 then
       return 0;
     end if;
-    while index < val'right loop
+    if v_index = val'right and not isMatch(val(v_index), delim) then
+      return 1;
+    end if;
+    while index <= val'length loop
       --skip delimators
-      while index /= val'right and isMatch(val(index), delim) loop
-        index := index + incr;
+      while v_index /= val'right and isMatch(val(v_index), delim) loop
+        v_index := v_index + incr;
+        index := index + 1;
       end loop;
-      if index = val'right then
-        if isMatch(val(index), delim) then
+      if v_index = val'right then
+        if isMatch(val(v_index), delim) then
           return cnt;
         else
           return cnt + 1;--one character after delimators
@@ -53,8 +58,9 @@ package body str_lst_pkg is
       end if;
       cnt := cnt + 1;
       --skip nondelimators
-      while index /= val'right and not isMatch(val(index), delim) loop
-        index := index + incr;
+      while v_index /= val'right and not isMatch(val(v_index), delim) loop
+        v_index := v_index + incr;
+        index := index + 1;
       end loop;
     end loop;
     return cnt;
